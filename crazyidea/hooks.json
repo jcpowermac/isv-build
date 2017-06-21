@@ -1,0 +1,6 @@
+[
+    {
+        "execute-command": "oc.sh",
+        "id": "webhook"
+    }
+]

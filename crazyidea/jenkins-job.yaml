@@ -1,0 +1,50 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: jenkins-ephemeral
+  name: jenkins
+spec:
+  selector:
+    name: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins-ephemeral
+        name: jenkins
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_ENABLE_OAUTH
+          value: "true"
+        - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+          value: "true"
+        - name: KUBERNETES_MASTER
+          value: https://kubernetes.default:443
+        - name: KUBERNETES_TRUST_CERTIFICATES
+          value: "true"
+        - name: JNLP_SERVICE_NAME
+          value: jenkins-jnlp
+        image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:66eea68ebc701a13527a4172feb2c4c0c9acda09efaa59821393498121d97ae0
+        imagePullPolicy: IfNotPresent
+        name: jenkins
+        resources:
+          limits:
+            memory: 512Mi
+        securityContext:
+          capabilities: {}
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /var/lib/jenkins
+          name: jenkins-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      securityContext: {}
+      serviceAccount: jenkins
+      serviceAccountName: jenkins
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: jenkins-data
