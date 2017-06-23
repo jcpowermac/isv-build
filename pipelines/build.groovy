@@ -1,5 +1,8 @@
 #!groovy
 
+//@Library('Utils')
+//import com.redhat.*
+
 node {
    // Description: build image
    // Params: projectName
@@ -17,9 +20,35 @@ node {
      return
    }
 
+   stage('Create Build (if necessary)') {
+       echo "conditionally creating build"
+       //openshiftVerifyBuild(buildConfig: "${containerName}")
+       /*
+
+       TODO: The current verison of this may not be sufficient for a build service.
+       newBuild = newBuildOpenShift() {
+           url = sourceUrl
+           branch = sourceBranch
+           contextDir = sourceContextDir
+           deleteBuild = false
+           randomName = false
+       }
+       */
+
+   }
+
    stage('Start container image build') {
        // verify build exists?
        echo "OpenShift build"
+       /*
+       TODO: variable for imageTag
+       containerZoneScan {
+           credentialsId = "ContainerZone"
+           openShiftUri = "insecure://api.rhc4tp.openshift.com"
+           imageName = containerName
+           imageTag = "1.0"
+       }
+       */
    }
 
    stage('Verify build completed') {

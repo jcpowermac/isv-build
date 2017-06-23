@@ -1,5 +1,8 @@
 #!groovy
 
+//@Library('')
+//import com.redhat.*
+
 node {
    // Description: send publish call to RH connect API and notify
    // Params: projectName
@@ -20,7 +23,19 @@ node {
    stage('Publish') {
        // FIXME: need logic here for notify vs wait for hook_received or manual action
        if (autoPublish) {
-         echo 'publishing image'
+
+           echo 'publishing image'
+
+           /*
+           TODO: Would need to figure out credentials
+           containerZonePublish {
+               credentialsId = "ContainerZone"
+               openShiftUri = "insecure://api.rhc4tp.openshift.com"
+               imageName = containerName
+               imageTag = containerTag
+           }
+           */
+
        }
        // else we need to figure out hooks
    }

@@ -26,9 +26,30 @@ spec:
           value: "true"
         - name: JNLP_SERVICE_NAME
           value: jenkins-jnlp
-        image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:66eea68ebc701a13527a4172feb2c4c0c9acda09efaa59821393498121d97ae0
+        image: 172.30.10.223:5000/jenkins-as-job/jenkins:latest
         imagePullPolicy: IfNotPresent
         name: jenkins
+        livenessProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 420
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        name: jenkins
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /login
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
         resources:
           limits:
             memory: 512Mi
