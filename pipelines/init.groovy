@@ -5,10 +5,14 @@ node {
    // Params: projectName
    // Triggers: call from RH Connect
 
+   def workspace = pwd()
+   def paramsFile = "${workspace}@script/vars/params/${projectName}.groovy"
+
    try {
-     evaluate(new File("vars/params/${projectName}.groovy"))
+     load "${paramsFile}"
    } catch ( e ) {
-     println "Could not initialize"
+     println "Could not initialize params file"
+     println e.toString()
      currentBuild.result = 'FAILURE'
      return
    }

@@ -5,8 +5,11 @@ node {
    // Params: projectName
    // Triggers: RH Connect call, healthScan job
 
+   def workspace = pwd()
+   def paramsFile = "${workspace}@script/vars/params/${projectName}.groovy"
+
    try {
-     load "vars/params/${projectName}.groovy"
+     load "${paramsFile}"
    } catch ( e ) {
      println "Could not initialize params file"
      println e.toString()
@@ -30,17 +33,6 @@ node {
 
    stage('Poll for healthScan results') {
        echo ''
-   }
-
-   stage("Wait for Remote System") {
-       // webhook-step plugin
-       hook = registerWebhook()
-       echo "Waiting for POST to ${hook.getURL()}"
-       // callback POST failing with 500
-       /*
-       data = waitForWebhook hook
-       echo "Webhook called with data: ${data}"
-       */
    }
 
    stage('Notify') {
