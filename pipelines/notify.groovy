@@ -2,7 +2,7 @@
 
 node {
    // Description: notify
-   // Params: projectName
+   // Params: projectName, subj, body
    // Triggers: any job that needs to notify
 
    def workspace = pwd()
@@ -20,8 +20,6 @@ node {
    stage('Notify') {
        if (notifyBuild.email) {
            echo "Emailing ${notifyBuild.email}"
-           def subj = "foo"
-           def body = "bar"
            mail bcc: '', body: "${body}", cc: '', from: "redhat-connect@redhat.com", replyTo: "do-not-reply@redhat.com", subject: "${subj}", to: "${notifyBuild.email}"
        }
        if (notifyBuild.slack) {
