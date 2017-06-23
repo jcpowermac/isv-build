@@ -17,40 +17,35 @@ node {
      return
    }
 
-   stage('Create Build (if necessary)') {
-       echo "conditionally creating build"
-       //openshiftVerifyBuild(buildConfig: "${containerName}")
+   stage('Create application') {
+     // oc new-app will create build, dc and service for app verification
+
+     // FIXME: conditionally build
+     def created
+     openshift.withCluster() {
+       openshift.withProject("${projectNamespace}") {
+         created = openshift.newApp("${sourceUrl}#${sourceBranch}")
+       }
+     }
+     echo "new-app created ${created.count()} objects named: ${created.names()}"
+     created.describe()
+     def dc = created.narrow('dc')
+     def bc = created.narrow('bc')
+     def buildResult = bc.logs('-f')
+     echo "The logs operation require ${result.actions.size()} oc interactions"
+     def logsString = buildResult.actions[0].out
+     def buildErr = buildResult.actions[0].err
    }
 
-   stage('Start container image build') {
-       echo "OpenShift build"
+   stage('Verify build') {
+     // check ${buildErr} to conditionally fail or use...
+     //openshiftVerifyBuild(buildConfig: "${containerName}")
+     echo ''
    }
-   stage('Call external webhook') {
-       echo 'https://httpbin.org/get'
+
+   stage('Verify application') {
+     // check ${dc} object
+     echo ''
    }
-   stage("Wait for Remote System") {
-       // webhook-step plugin
-       hook = registerWebhook()
-       echo "Waiting for POST to ${hook.getURL()}"
-       // callback POST failing with 500
-       /*
-       data = waitForWebhook hook
-       echo "Webhook called with data: ${data}"
-       */
-   }
-   stage('Poll for image scan results') {
-       echo 'Scanning status...'
-   }
-   stage('Publish?') {
-       echo 'Do you want to publish?' // need this to be an external webhook
-   }
-   stage('Notify') {
-       if (notifyBuild.email) {
-           echo "Emailing ${notifyBuild.email}"
-       }
-       if (notifyBuild.slack) {
-           echo "Posting slack msg to ${notifyBuild.slack}"
-           //slackSend channel: "${notifyBuild.slack.channel}", message: "Debug ISV build service"
-       }
-   }
+
 }
