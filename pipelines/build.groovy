@@ -6,7 +6,7 @@ node {
    // Triggers: RH Connect call, healthScan job
 
    try {
-     evaluate(new File("vars/params/${projectName}.groovy"))
+     load "vars/params/${projectName}.groovy"
    } catch ( e ) {
      println "Could not initialize params file"
      println e.toString()
