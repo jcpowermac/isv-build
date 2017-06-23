@@ -1,7 +1,7 @@
 #!groovy
 
 node {
-   // Description: periodically run healthScan
+   // Description: periodically run healthScan, conditionally call build
    // Params: projectName
    // Triggers: daily cron
 
@@ -17,25 +17,13 @@ node {
      return
    }
 
-   def notify = false
-
    stage('Get latest healthScan') {
        echo ''
-       // if rebuild, call rebuild job and set notify
+       // if rebuild, call rebuild job
          // rebuild
          // notify = true
-         // build job: 'build', parameters: [string(name:'projectName', value: "${projetName}")]
+         build job: 'build',
+         parameters: [string(name:"projectName", value: "${projectName}")], propagate: false
    }
 
-   stage('Notify') {
-       if (notify) {
-           if (notifyBuild.email) {
-               echo "Emailing ${notifyBuild.email}"
-           }
-           if (notifyBuild.slack) {
-               echo "Posting slack msg to ${notifyBuild.slack}"
-               //slackSend channel: "${notifyBuild.slack.channel}", message: "Debug ISV build service"
-           }
-       }
-   }
 }
