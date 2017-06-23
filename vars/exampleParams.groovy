@@ -5,7 +5,7 @@ sourceUrl = ""
 sourceContextDir = null
 sourceSecret = null
 sourceBranch = "master" // default
-notifyBuild = [email: [""], slack: [baseUrl: "", channel: "#CHAN", botUser: null, teamDomain: null, token: null, tokenCredentialId: null], webhook: null]
+notifyBuild = [email: "<comma-separated,email,addresses>", slack: [baseUrl: "", channel: "#CHAN", botUser: null, teamDomain: null, token: null, tokenCredentialId: null], webhook: null]
 notifyPublish = [email: null, slack: "", webhook: ""]
 autoPublish = true
 // build triggers?
