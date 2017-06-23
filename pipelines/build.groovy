@@ -8,7 +8,8 @@ node {
    try {
      evaluate(new File("vars/params/${projectName}.groovy"))
    } catch ( e ) {
-     println "Could not initialize"
+     println "Could not initialize params file"
+     println e.toString()
      currentBuild.result = 'FAILURE'
      return
    }
