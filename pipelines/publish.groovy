@@ -17,16 +17,29 @@ node {
      return
    }
 
-   stage('Publish?') {
-       echo 'Do you want to publish?' // need this to be an external webhook
+   stage('Publish') {
+       // FIXME: need logic here for notify vs wait for hook_received or manual action
+       if (autoPublish) {
+         echo 'publishing image'
+       }
+       // else we need to figure out hooks
    }
    stage('Notify') {
-       if (notifyBuild.email) {
-           echo "Emailing ${notifyBuild.email}"
-       }
-       if (notifyBuild.slack) {
-           echo "Posting slack msg to ${notifyBuild.slack}"
-           //slackSend channel: "${notifyBuild.slack.channel}", message: "Debug ISV build service"
-       }
+       def subj = "Red Hat Connect publish ${currentBuild.number}: ${currentBuild.result}"
+       def body = '''
+          Job: ${currentBuild.number}
+          Result: ${currentBuild.result}
+          Previous build result: ${currentBuild.previousBuild}
+          Reason:
+          Lorem ipsum dolor sit amet,
+          consectetur adipiscing elit,
+          sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
+          '''
+       build job: 'notify',
+       parameters: [string(name:"projectName", value: "${projectName}"),
+       string(name:"subj", value: "${subj}"),
+       string(name:"body", value: "${body}")],
+       propagate: false
    }
 }

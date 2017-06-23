@@ -45,8 +45,9 @@ node {
           ut labore et dolore magna aliqua.
           '''
        build job: 'notify',
-       parameters: [string(name:"projectName", value: "${projetName}"),
+       parameters: [string(name:"projectName", value: "${projectName}"),
        string(name:"subj", value: "${subj}"),
-       string(name:"body", value: "${body}")]
+       string(name:"body", value: "${body}")],
+       propagate: false
    }
 }
