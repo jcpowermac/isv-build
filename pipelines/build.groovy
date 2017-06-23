@@ -1,7 +1,7 @@
 #!groovy
 
 node {
-   // Description: build image and notify
+   // Description: build image
    // Params: projectName
    // Triggers: RH Connect call, healthScan job
 
@@ -17,16 +17,13 @@ node {
      return
    }
 
-   stage('Create Build (if necessary)') {
-       echo "conditionally creating build"
-       //openshiftVerifyBuild(buildConfig: "${containerName}")
-   }
-
    stage('Start container image build') {
+       // verify build exists?
        echo "OpenShift build"
    }
 
    stage('Verify build completed') {
+       // poll for build to complete
        echo ''
        // pushed build will auto-trigger healthScan
    }
@@ -36,13 +33,20 @@ node {
    }
 
    stage('Notify') {
-       // move to vars method
-       if (notifyBuild.email) {
-           echo "Emailing ${notifyBuild.email}"
-       }
-       if (notifyBuild.slack) {
-           echo "Posting slack msg to ${notifyBuild.slack}"
-           //slackSend channel: "${notifyBuild.slack.channel}", message: "Debug ISV build service"
-       }
+       def subj = "Red Hat Connect build ${currentBuild.number}: ${currentBuild.result}"
+       def body = '''
+          Job: ${currentBuild.number}
+          Result: ${currentBuild.result}
+          Previous build result: ${currentBuild.previousBuild}
+          Reason:
+          Lorem ipsum dolor sit amet,
+          consectetur adipiscing elit,
+          sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
+          '''
+       build job: 'notify',
+       parameters: [string(name:"projectName", value: "${projetName}"),
+       string(name:"subj", value: "${subj}"),
+       string(name:"body", value: "${body}")]
    }
 }
