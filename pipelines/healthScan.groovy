@@ -1,5 +1,8 @@
 #!groovy
 
+//@Library('')
+//import com.redhat.*
+
 node {
    // Description: periodically run healthScan, conditionally call build
    // Params: projectName
@@ -20,10 +23,20 @@ node {
    stage('Get latest healthScan') {
        echo ''
        // if rebuild, call rebuild job
-         // rebuild
-         // notify = true
-         build job: 'build',
-         parameters: [string(name:"projectName", value: "${projectName}")], propagate: false
+       /*
+       def jobParameters = new JenkinsUtils().createJobParameters([name: "foo"])
+       containerZoneHealthCheck {
+           credentialsId = "ContainerZone"
+           rebuildJobName = jobName
+           rebuildJobParameters = jobParameters
+       }
+       */
+
+       // if rebuild, call rebuild job and set notify
+       // rebuild
+       // notify = true
+       build job: 'build',
+               parameters: [string(name:"projectName", value: "${projectName}")], propagate: false
    }
 
 }

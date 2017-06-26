@@ -1,6 +1,6 @@
 [
     {
-        "execute-command": "oc.sh",
+        "execute-command": "./oc.sh",
         "id": "webhook"
     }
 ]
