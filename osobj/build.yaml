@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      build: generic-buildconfig
+    name: generic-buildconfig
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: isv-build:latest
+    runPolicy: Serial
+    source:
+      git:
+        uri: ssh://git@github.com/jcpowermac/isv-build
+        ref: buildconfig
+      sourceSecret:
+        name: source
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile.rhel
+        from:
+          kind: ImageStreamTag
+          name: nodejs-6-rhel7:latest
+      type: Docker
+    triggers:
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      build: isv-build
+    name: isv-build
+  spec: {}
+
