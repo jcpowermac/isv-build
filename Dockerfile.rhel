@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/rhscl/nodejs-6-rhel7:latest
 
+USER root
 RUN yum install -y vim && \
     yum clean all
-
+USER 1001
