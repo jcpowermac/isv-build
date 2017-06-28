@@ -1,0 +1,63 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: ansible.kubernetes-modules
+  tasks:
+    - name: Create Project
+      openshift_v1_project:
+        name: '{{ namespace }}'
+    - name: Create local secret
+      user:
+        name: '{{ namespace }}'
+        generate_ssh_key: True
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
+      become: True
+      register: user
+    - debug:
+        msg: '{{ user }}'
+
+    - file:
+        path: "/home/fastcompany"
+        recurse: True
+        mode: 0777
+        owner: jcallen
+      become: True
+
+    - file:
+        path: "{{ user.ssh_key_file }}"
+        owner: jcallen
+        mode: 0777
+      become: True
+
+    - name: Create GitHub Secret
+      k8s_v1_secret:
+        debug: False
+        name: source
+        namespace: '{{ namespace }}'
+        type: kubernetes.io/ssh-auth
+        string_data:
+          ssh-privatekey: "{{ lookup('file', user.ssh_key_file )}}"
+      ignore_errors: True
+
+    - name: Checkout
+      git:
+        repo: "{{ source_url }}"
+        dest: "{{ source_dest_path }}" #/tmp/checkout
+        update: False
+      
+    - command: "cat {{ dockerfile_path }}"
+      register: lines
+
+    - set_fact:
+        base_image: "{{ item | regex_replace('FROM ') }}"
+      when: "'FROM' in item"
+      with_items: 
+        - "{{ lines.stdout_lines }}"
+
+      
+
+
+
+

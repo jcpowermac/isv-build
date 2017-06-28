@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: nodejs-6-rhel7
+  spec: {}
+
+- apiVersion: v1
+  generation: 1
+  kind: ImageStreamTag
+  metadata:
+    name: nodejs-6-rhel7:latest
+  tag:
+    from:
+      kind: DockerImage
+      name: registry.access.redhat.com/rhscl/nodejs-6-rhel7
+    importPolicy:
+      scheduled: true
+    name: latest
