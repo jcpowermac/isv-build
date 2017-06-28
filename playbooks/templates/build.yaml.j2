@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: generic-buildconfig
+  name: generic-buildconfig
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ isv_image_name }}:{{ isv_image_tag }}
+  runPolicy: Serial
+  source:
+    git:
+      uri: {{ source_url }}
+      ref: {{ source_ref }}
+    sourceSecret:
+      name: source
+    type: Git
+  strategy:
+    dockerStrategy:
+      dockerfilePath: {{ source_dockerfile_path }}
+      from:
+        kind: ImageStreamTag
+        name: {{ base_image_name }}:{{ base_image_tag }}
+    type: Docker
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange
+

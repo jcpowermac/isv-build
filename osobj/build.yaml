@@ -9,6 +9,10 @@ items:
       build: generic-buildconfig
     name: generic-buildconfig
   spec:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
     output:
       to:
         kind: ImageStreamTag
