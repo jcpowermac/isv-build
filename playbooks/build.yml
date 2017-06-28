@@ -1,0 +1,44 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: ansible.kubernetes-modules
+  tasks:
+
+    - name: Checkout
+      git:
+        repo: "{{ source_url }}"
+        dest: "{{ source_dest_path }}" #/tmp/checkout
+        update: False
+
+    - command: "cat {{ dockerfile_path }}"
+      register: lines
+
+    - set_fact:
+        base_image: "{{ item | regex_replace('FROM ') }}"
+      when: "'FROM' in item"
+      with_items:
+        - "{{ lines.stdout_lines }}"
+
+    - set_fact:
+        base_image_tag: "{{ base_image.split(':')[-1] }}"
+        base_image_name: "{{ base_image.split(':')[0].split('/')[-1] }}"
+        tag_from_name: "{{ base_image.split(':')[0] }}"
+
+    - name: Get ISV ImageStream
+      openshift_v1_image_stream:
+        name: "{{ isv_image_name }}"
+        namespace: "{{ namespace }}"
+      register: is
+
+    - set_fact:
+        build_number: "{{ (is.image_stream.status.tags[-1].tag.split('-')[-1] | int) + 1 }}"
+
+    - name: Update BuildConfig
+      openshift_v1_build_config:
+        name: "generic-buildconfig"
+        namespace: "{{ namespace }}"
+        spec_output_to_name: "{{ isv_image_name }}:{{ isv_image_tag }}-{{ build_number }}"
+
+    - name: Start Build
+      command: "oc -n {{ namespace }} start-build --follow generic-buildconfig"

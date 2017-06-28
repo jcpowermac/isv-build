@@ -1,2 +1,21 @@
 ---
 namespace: "fastcompany"
+source_url: "ssh://git@github.com/jcpowermac/isv-build"
+source_ref: "ansible"
+source_dest_path: "/tmp/checkout"
+
+dockerfile_path: "{{ source_dest_path }}/Dockerfile.rhel"
+
+source_context_dir: ""
+source_dockerfile_path: "Dockerfile.rhel"
+
+source_secret_name: "source"
+
+isv_image_name: "isv-build"
+isv_image_tag: "1.0"
+
+
+
+
+
+
