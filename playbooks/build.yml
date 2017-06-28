@@ -25,6 +25,46 @@
         base_image_name: "{{ base_image.split(':')[0].split('/')[-1] }}"
         tag_from_name: "{{ base_image.split(':')[0] }}"
 
+    - name: Check Base Image
+      openshift_v1_image_stream:
+        name: "{{ base_image_name }}"
+        namespace: "{{ namespace }}"
+      register: isbase
+
+      #    - debug:
+      #        var: isbase.image_stream_spec.tags[-1]._from
+    - debug:
+        var: isbase.image_stream.spec.tags[-1]['_from'].name
+
+    - debug:
+        msg: "Update"
+      when: tag_from_name in isbase.image_stream.spec.tags[-1]['_from'].name
+
+    - block:
+       - name: Template Base ImageStream
+         template:
+           src: templates/baseis.yaml.j2
+           dest: /tmp/baseis.yaml
+           force: True
+         register: baseis
+
+       - name: Create Base ImageStream
+         openshift_v1_image_stream:
+           name: "{{ base_image_name }}"
+           namespace: "{{ namespace }}"
+           src: "{{ baseis.dest | default(baseis.path) }}"
+       - name: Template Base ImageStream
+         template:
+           src: templates/baseistag.yaml.j2
+           dest: /tmp/baseistag.yaml
+           force: True
+         register: baseistag
+       - name: Create Base ImageStreamTag
+         command: "oc -n {{ namespace }} create -f {{ baseistag.dest | default(baseistag.path) }}"
+         ignore_errors: True
+      when: tag_from_name not in isbase.image_stream.spec.tags[-1]['_from'].name
+
+
     - name: Get ISV ImageStream
       openshift_v1_image_stream:
         name: "{{ isv_image_name }}"
@@ -39,6 +79,7 @@
         name: "generic-buildconfig"
         namespace: "{{ namespace }}"
         spec_output_to_name: "{{ isv_image_name }}:{{ isv_image_tag }}-{{ build_number }}"
+        spec_strategy_docker_strategy__from_name: "{{ base_image_name }}:{{ base_image_tag }}"
 
     - name: Start Build
       command: "oc -n {{ namespace }} start-build --follow generic-buildconfig"
