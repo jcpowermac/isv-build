@@ -9,6 +9,18 @@
     - role: ansible.kubernetes-modules
   tasks:
 
+    - name: Poll Health Status
+      debug:
+        msg: "Poll Health Status..."
+
+    - debug:
+        msg: "Health Status: {{ health_status }}"
+
+# TODO: Would need a conditional for HealthStatus in the case
+# of periodic rebuild.  If none or recommended don't build.  If mandatory
+# start-build.
+
+
 # ----------------------------
 # Read Dockerfile
 # ----------------------------
@@ -99,3 +111,16 @@
 
     - name: Start Build
       command: "oc -n {{ namespace }} start-build --follow generic-buildconfig"
+
+
+    - name: Poll Scan Results
+      debug:
+        msg: "Polling Scan Results...."
+
+    - name: Publish
+      debug:
+        msg: "Publishing...."
+      when: not scan_results
+
+
+
