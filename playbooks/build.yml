@@ -1,3 +1,7 @@
+---
+# ----------------------------
+# Prototype - Build, Rebuild-{Manual,Health}
+# ----------------------------
 - hosts: localhost
   connection: local
   gather_facts: no
@@ -5,40 +9,45 @@
     - role: ansible.kubernetes-modules
   tasks:
 
+# ----------------------------
+# Read Dockerfile
+# ----------------------------
+# To determine the base image that the ISV's container uses we need parse that
+# from the Dockerfile.  Those variables will be used in ImageStream and ImageStreamTags
+# ----------------------------
     - name: Checkout
       git:
         repo: "{{ source_url }}"
-        dest: "{{ source_dest_path }}" #/tmp/checkout
+        dest: "{{ source_dest_path }}"
         update: False
-
-    - command: "cat {{ dockerfile_path }}"
-      register: lines
 
     - set_fact:
         base_image: "{{ item | regex_replace('FROM ') }}"
       when: "'FROM' in item"
       with_items:
-        - "{{ lines.stdout_lines }}"
+        - "{{ lookup('file', dockerfile_path ).split('\n') }}"
 
     - set_fact:
         base_image_tag: "{{ base_image.split(':')[-1] }}"
         base_image_name: "{{ base_image.split(':')[0].split('/')[-1] }}"
         tag_from_name: "{{ base_image.split(':')[0] }}"
 
+# ----------------------------
+# Base Image Change
+# ----------------------------
+# What happens when the base image change for the ISV container?
+# Let's check what the current base image is and compare it to what is
+# presently in the Dockerfile.  If it is not the same create a new base image.
+#
+#
+# NOTE: I found a bug...I read the current Dockerfile but if it has changed
+# then the `base_image_name` is different.  This information will need to be stored.
+# ----------------------------
     - name: Check Base Image
       openshift_v1_image_stream:
         name: "{{ base_image_name }}"
         namespace: "{{ namespace }}"
       register: isbase
-
-      #    - debug:
-      #        var: isbase.image_stream_spec.tags[-1]._from
-    - debug:
-        var: isbase.image_stream.spec.tags[-1]['_from'].name
-
-    - debug:
-        msg: "Update"
-      when: tag_from_name in isbase.image_stream.spec.tags[-1]['_from'].name
 
     - block:
        - name: Template Base ImageStream
@@ -64,6 +73,13 @@
          ignore_errors: True
       when: tag_from_name not in isbase.image_stream.spec.tags[-1]['_from'].name
 
+# ----------------------------
+# Rebuild
+# ----------------------------
+# Get the current ImageStream to determine the build number: tag-build#
+# Increment the build number.  Update the BuildConfig to push to new
+# ImageStreamTag.  If the base image has changed modify that as well.
+# ----------------------------
 
     - name: Get ISV ImageStream
       openshift_v1_image_stream:
