@@ -1,0 +1,33 @@
+
+        #    - name: Import Base Image Stream
+        #  openshift_v1_image_stream_import:
+        #  opname: "{{ base_image_name }}"
+        #  opnamespace: "{{ namespace }}"
+        #  opspec_repository__from_kind: DockerImage
+        #  opspec_repository__from_name: "{{ base_image }}"
+        #  opspec_repository_import_policy_scheduled: True
+
+
+        #    - name: Create Base ImageStreamTag
+        #      openshift_v1_image_stream_tag:
+        #        name: "{{ base_image_name }}:{{ base_image_tag }}"
+        #        namespace: "{{ namespace }}"
+        #        tag__from_kind: DockerImage
+        #        tag__from_name: "{{ tag_from_name }}"
+        #        scheduled: True
+        #        tag_name: "{{ base_image_tag }}"
+        #
+
+    # NOTE: ** image_stream_tag and image_stream_import modules are broken
+
+
+      #    - name: Create Base ImageStream
+      #      command: "oc -n {{ namespace }} create -f {{ baseis.dest | default(baseis.path) }}"
+        # NOTE: BUG with requiring state then another warning with using state
+          #    - name: start build
+          #      openshift_v1_build_request:
+          #        name: "generic-buildconfig"
+          #        namespace: "{{ namespace }}"
+          #        state: present
+          #      register: build
+          #
