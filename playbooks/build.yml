@@ -7,7 +7,7 @@
   gather_facts: no
   roles:
     - role: ansible.kubernetes-modules
-      install_python_requirements: True
+      install_python_requirements: False
   tasks:
 
     - name: Poll Health Status
@@ -51,10 +51,6 @@
 # What happens when the base image change for the ISV container?
 # Let's check what the current base image is and compare it to what is
 # presently in the Dockerfile.  If it is not the same create a new base image.
-#
-#
-# NOTE: I found a bug...I read the current Dockerfile but if it has changed
-# then the `base_image_name` is different.  This information will need to be stored.
 # ----------------------------
     - name: Check Base Image
       openshift_v1_image_stream:
@@ -100,8 +96,15 @@
         namespace: "{{ namespace }}"
       register: is
 
+
+    - debug:
+        var: is
+
     - set_fact:
-        build_number: "{{ (is.image_stream.status.tags[-1].tag.split('-')[-1] | int) + 1 }}"
+        build_number: "{{ (is.image_stream.status.tags[0].tag.split('-')[-1] | int) + 1 }}"
+
+    - debug:
+        var: build_number
 
     - name: Update BuildConfig
       openshift_v1_build_config:
@@ -124,4 +127,18 @@
       when: not scan_results
 
 
+# ----------------------------
+# Clean up tags
+# ----------------------------
+# How many tags to keep?
+# Quantity
+# Time
+#
+# ----------------------------
+
+    - block:
+        - debug:
+            var: is.image_stream.status.tags[0].get('items')[0].created | to_datetime("%Y-%m-%dT%H:%M:%SZ")
+
+      when: is.image_stream.status.tags | length > 1
 

@@ -7,7 +7,7 @@
   gather_facts: no
   roles:
     - role: ansible.kubernetes-modules
-      install_python_requirements: True
+      install_python_requirements: False
   tasks:
     - name: Create Project
       openshift_v1_project:
