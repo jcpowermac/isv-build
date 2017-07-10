@@ -1,0 +1,39 @@
+{
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "generic-buildconfig"
+    },
+    "spec": {
+        "runPolicy": "Serial",
+        "source": {
+            "type": "Git",
+            "git": {
+                "uri": "{{ source_uri }}",
+                "ref": "{{ source_ref }}"
+            },
+            "sourceSecret": {
+                "name": "{{ source_secret_name }}"
+            },
+            "contextDir": "{{ context_dir }}"
+        },
+        "strategy": {
+            "type": "Docker",
+            "dockerStrategy": {
+                "dockerfilePath": "{{ dockerfile_path }}"
+            }
+        },
+        "output": {
+            "to": {
+                "kind": "ImageStreamTag",
+                "name": "{{ image_stream_tag }}"
+            }
+        },
+        "resources": {
+            "requests": {
+                "cpu": "{{ cpu_resource_request }}",
+                "memory": "{{ memory_resource_request }}"
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "output": {
+        "to": {
+            "name": "{{ image_stream_tag }}"
+        }
+    },
+    "spec": {
+        "source": {
+            "contextDir": "{{ context_dir }}",
+            "git": {
+                "ref": "{{ source_ref }}",
+                "uri": "{{ source_uri }}"
+            }
+        },
+        "strategy": {
+            "dockerfilePath": "{{ dockerfile_path }}"
+        }
+    }
+}
